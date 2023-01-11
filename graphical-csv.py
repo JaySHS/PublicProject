@@ -13,7 +13,11 @@ from IPython.display import display
 filetype = (('csv files', '*.csv'), ('All files', '*.*'))
 fn = filedialog.askopenfilename(filetypes=filetype)
 
-file = open(fn, "r")
+try:
+    file = open(fn, "r")
+except:
+    print("Error : could not open file.")
+    
 #Second : read data
 name = file.readline().split(",")
 name[-1] = name[-1].strip()
@@ -28,6 +32,8 @@ for i in range(N):
 
 data = []
 
+iferror = False
+
 for line in file:
     ldata = line.split(',')
     ldata[-1] = ldata[-1].strip()
@@ -35,12 +41,16 @@ for line in file:
         try:
             ldata[i] = float(ldata[i])
         except:
-            ldata[i] = str(ldata[i])
+            ldata[i] = 0
+            iferror = True
     data.append(ldata)
 
-print(type(data[10][10]))
+if(iferror):
+        print("Error : Non-numeric data was found. It was replaced to 0.")
 
-arrdata = np.transpose(np.array(data))
+arrdata = np.transpose(np.array(data, dtype=float))
+
+print(type(arrdata[10][10]))
 
 dataset = {}
 for i in range(N):
@@ -48,7 +58,7 @@ for i in range(N):
     
 data_pd = pd.DataFrame(dataset)
 
-ct = data_pd["critical temp"].to_numpy()
+ct = data_pd[fname[N-1]].to_numpy()
 print(ct)
 print(type(ct[0]))
 #Third : create a dropdown menu
