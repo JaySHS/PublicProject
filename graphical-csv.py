@@ -9,57 +9,78 @@ from tkinter.ttk import *
 import pandas as pd
 from IPython.display import display
 
-#First : open file(csv)
-filetype = (('csv files', '*.csv'), ('All files', '*.*'))
-fn = filedialog.askopenfilename(filetypes=filetype)
+#Create a window with tkinter
 
-try:
-    file = open(fn, "r")
-except:
-    print("Error : could not open file.")
-    
-#Second : read data
-name = file.readline().split(",")
-name[-1] = name[-1].strip()
+class App(Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Graphical csv reader")
+        self.geometry("1080x720")
+        self.filetype = (('csv files', '*.csv'), ('All files', '*.*'))
 
-N = len(name)
-temp = []
-fname = []
+    def run(self):
+        self.btn_openfile = Button(text="open file", command=self.openfile)
+        self.ent_filename = Entry(state=DISABLED, width=48)
+        self.ent_filename.place(x=10, y=12)
+        self.btn_openfile.place(x=310, y=10)
+        self.mainloop()
 
-for i in range(N):
-    temp.append(name[i].replace("_", " "))
-    fname.append(temp[i].replace("\"", ""))
+    #Open file(csv)    
+    def openfile(self):
+        fn = filedialog.askopenfilename(filetypes=self.filetype)
 
-data = []
-
-iferror = False
-
-for line in file:
-    ldata = line.split(',')
-    ldata[-1] = ldata[-1].strip()
-    for i in range(len(ldata)):
         try:
-            ldata[i] = float(ldata[i])
+            file = open(fn, "r")
+            self.ent_filename.config(state=NORMAL)
+            self.ent_filename.delete(0, END)
+            self.ent_filename.insert(0, fn)
+            self.ent_filename.config(state=DISABLED)
+            readdata(file)
         except:
-            ldata[i] = 0
-            iferror = True
-    data.append(ldata)
+            print("Error : could not open file.")   
+    
+#Read data
+def readdata(file):
+    name = file.readline().split(",")
+    name[-1] = name[-1].strip()
 
-if(iferror):
+    N = len(name)
+    temp = []
+    fname = []
+
+    for i in range(N):
+        temp.append(name[i].replace("_", " "))
+        fname.append(temp[i].replace("\"", ""))
+
+    data = []
+
+    iferror = False
+
+    for line in file:
+        ldata = line.split(',')
+        ldata[-1] = ldata[-1].strip()
+        for i in range(len(ldata)):
+            try:
+                ldata[i] = float(ldata[i])
+            except:
+                ldata[i] = 0
+                iferror = True
+        data.append(ldata)
+
+    if(iferror):
         print("Error : Non-numeric data was found. It was replaced to 0.")
 
-arrdata = np.transpose(np.array(data, dtype=float))
+    arrdata = np.transpose(np.array(data, dtype=float))
 
-print(type(arrdata[10][10]))
-
-dataset = {}
-for i in range(N):
-    dataset.update({fname[i] : arrdata[i]})
+    dataset = {}
+    for i in range(N):
+        dataset.update({fname[i] : arrdata[i]})
     
-data_pd = pd.DataFrame(dataset)
+    data_pd = pd.DataFrame(dataset)
 
-ct = data_pd[fname[N-1]].to_numpy()
-print(ct)
-print(type(ct[0]))
-#Third : create a dropdown menu
-#Fourth : plot with the chosen axis
+    return data_pd, fname
+
+#Create a dropdown menu
+win = App()
+win.run()
+#Plot with the chosen axis
