@@ -1,4 +1,16 @@
 silicon-dos.ipynb
 siliconpwtest.py
-Sipwscftest.in
+test.py
+
 test.cpp
+test.exe
+win32test.cpp
+win32test.exe
+
+test.java
+testclass.java
+
+Sipwscftest.in
+
+/.vscode/
+/godot-sample/
